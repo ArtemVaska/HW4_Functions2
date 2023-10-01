@@ -1,29 +1,6 @@
-AMINOACID_DICT = {
-    'A': 'Alanine', 'a': 'alanine',
-    'C': 'Cysteine', 'c': 'cysteine',
-    'D': 'Aspartic acid', 'd': 'aspartic acid',
-    'E': 'Glutamic acid', 'e': 'glutamic acid',
-    'F': 'Phenylalanine', 'f': 'Phenylalanine',
-    'G': 'Glycine', 'g': 'glycine',
-    'H': 'Histidine', 'h': 'histidine',
-    'I': 'Isoleucine', 'i': 'isoleucine',
-    'K': 'Lysine', 'k': 'lysine',
-    'L': 'Leucine', 'l': 'leucine',
-    'M': 'Methionine', 'm': 'methionine',
-    'N': 'Asparagine', 'n': 'asparagine',
-    'P': 'Proline', 'p': 'proline',
-    'Q': 'Glutamine', 'q': 'glutamine',
-    'R': 'Arginine', 'r': 'arginine',
-    'S': 'Serine', 's': 'serine',
-    'T': 'Threonine', 't': 'threonine',
-    'V': 'Valine', 'v': 'valine',
-    'W': 'Tryptophan', 'w': 'tryptophan',
-    'Y': 'Tyrosine', 'y': 'tyrosine'
-}
-
 H2O_WEIGHT: float = 18.01468
 
-AA_MASS_DICT: dict[str, float] = {
+AA_MASS_DICT = {
     'G': 75.0659, 'g': 75.0659,
     'L': 131.17262, 'l': 131.17262,
     'Y': 181.18894, 'y': 181.18894,
@@ -46,7 +23,7 @@ AA_MASS_DICT: dict[str, float] = {
     'T': 119.11826, 't': 119.11826,
 }
 
-ATOMIC_MASS: dict[str, float] = {
+ATOMIC_MASS = {
     'C': 12.011,
     'H': 1.00784,
     'O': 15.999,
@@ -54,7 +31,7 @@ ATOMIC_MASS: dict[str, float] = {
     'S': 32.065
 }
 
-AA_NAME_DICT: dict[str, str] = {
+AA_NAME_DICT = {
     'G': 'Gly', 'g': 'Gly',
     'L': 'Leu', 'l': 'Leu',
     'Y': 'Tyr', 'y': 'Tyr',
@@ -396,7 +373,7 @@ def get_protein_rnas(seq: str,
     return "You don't know what you're doing!"  # politely ask user to reconsider their actions
 
 
-def get_protein_rnas_number(seq: int) -> int:
+def get_protein_rnas_number(seq: int, **_) -> int:
     """
     Get number of all possible RNA's for a given protein.
 
@@ -471,7 +448,7 @@ def get_frameshift_proteins(seq: int,
     return "You don't fucking know what you're doing!"  # politely ask user to reconsider their actions
 
 
-def length_of_protein(seq: str, **_) -> int:
+def get_length_of_protein(seq: str, **_) -> int:
     """
     Calculates the length of a protein.
 
@@ -537,7 +514,7 @@ def get_fracture_of_aa(seq: str, show_as_percentage: bool = False, aminoacids: s
     return aa_dict_percent
 
 
-def calculate_protein_mass(sequence: str, aa_atomic_mass: dict[str, float] = None) -> float:
+def calculate_protein_mass(sequence: str, aa_atomic_mass: dict = None) -> float:
     """
     Calculates the molecular mass of a protein based on its amino acid sequence and a dictionary of amino acid masses.
 
@@ -563,7 +540,7 @@ def calculate_protein_mass(sequence: str, aa_atomic_mass: dict[str, float] = Non
     return round(total_mass, 3)
 
 
-def get_atomic_mass(chem: str, atomic_mass: dict[str, float] = None) -> float:
+def get_atomic_mass(chem: str, atomic_mass: dict = None) -> float:
     """
     Calculates the molecular mass of a biological molecule, primarily an amino acid, based on a simple chemical formula.
 
@@ -598,7 +575,7 @@ def get_atomic_mass(chem: str, atomic_mass: dict[str, float] = None) -> float:
     return total_mass
 
 
-def convert_aa_name(sequence: str, name_dict: dict[str, str] = None, sep: str = '',
+def convert_aa_name(sequence: str, name_dict: dict = None, sep: str = '',
                     use_default_register: bool = True) -> str:
     """
     Converts a sequence of one-letter amino acid codes to three-letter designations.
@@ -646,9 +623,12 @@ command_dct = {
     'get_protein_rnas_number': get_protein_rnas_number,
     'get_frameshift_proteins': get_frameshift_proteins,
     'is_protein_valid': is_protein_valid,
-    'length_of_protein': length_of_protein,
+    'get_length_of_protein': get_length_of_protein,
     'count_aa': count_aa,
     'get_fracture_of_aa': get_fracture_of_aa,
+    'calculate_protein_mass': calculate_protein_mass,
+    'get_atomic_mass': get_atomic_mass,
+    'convert_aa_name': convert_aa_name,
     }
 
 
@@ -673,7 +653,7 @@ def parse_input(inp: str, **kwargs) -> dict:
     elif inp_type == dict:
         parsed_dct = inp
     elif inp_type == str and '.' in inp:  # check whether input has file extension symbols
-        parsed_dct = input_dct = read_seq_from_fasta(inp, **kwargs)
+        parsed_dct = read_seq_from_fasta(inp, **kwargs)
     elif inp_type == str:
         parsed_dct = {0: inp}
 
@@ -684,11 +664,28 @@ def run_ultimate_protein_tools(command,
                                inp,
                                *args,
                                **kwargs):
+    """
+    Accepts command and runs it on input data with params
+
+    Arguments:
+    - command (str): Valid command from command_dct
+    - inp (str): Input in form of path, seq, seq list or seq dct
+
+    Return:
+    - output_dct (dict): dict where keys are number or name of seq and values are results of command run
+    """
     output_dct = {}
-    input_dct = parse_input(inp)
+    input_dct = parse_input(inp, **kwargs)
     for name in input_dct:
-        if is_protein_valid(input_dct[name]):
+        if command in command_dct and command != 'get_atomic_mass':
+            if is_protein_valid(input_dct[name]):
+                output_dct[name] = command_dct[command](input_dct[name], *args, **kwargs)
+            else:
+                output_dct[name] = is_protein_valid(input_dct[name])
+        elif command == 'get_atomic_mass':
             output_dct[name] = command_dct[command](input_dct[name], *args, **kwargs)
         else:
-            output_dct[name] = is_protein_valid(input_dct[name])
+            print('Command invalid')
+    if len(output_dct) == 1:
+        return output_dct[list(output_dct.keys())[0]]
     return output_dct
